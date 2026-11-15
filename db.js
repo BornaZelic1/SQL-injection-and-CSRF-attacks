@@ -1,7 +1,6 @@
 const crypto = require('node:crypto');
 const { DatabaseSync } = require('node:sqlite');
 
-// Baza u memoriji: puni se pri svakom pokretanju i resetira gumbom.
 const db = new DatabaseSync(':memory:');
 
 function hashPassword(password) {
