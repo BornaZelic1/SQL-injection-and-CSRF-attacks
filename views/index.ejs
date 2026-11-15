@@ -6,6 +6,54 @@
 </head>
 <body>
   <h1>WEB2 Lab 2: SQL Injection i CSRF</h1>
-  <p>Faza 0: server radi. Sekcije za ranjivosti slijede u iducim fazama.</p>
+  <h2>SQL umetanje (SQL Injection)</h2>
+  <p>
+    <b>Upute:</b> Pretraga korisnika po korisničkom imenu. Upis <code>ana</code> vraća jednog korisnika.
+    Kad je ranjivost uključena, unos se lijepi direktno u SQL upit, pa ga napadač može izmijeniti:
+  </p>
+  <ul>
+    <li>tautologija (vraća sve korisnike): <code>' OR 1=1 --</code></li>
+    <li>UNION (otkriva hasheve lozinki): <code>' UNION SELECT id, username, password_hash FROM users --</code></li>
+  </ul>
+  <p>
+    Aplikacija koristi SQLite, u kojem je komentar <code>--</code> (a ne <code>#</code> kao u MySQL-u).
+    Kad je ranjivost isključena, koristi se parametrizirani upit: isti unos tretira se kao obično
+    korisničko ime i ne vraća ništa.
+  </p>
+
+  <form method="post" action="/sqli">
+    <p><label><input type="checkbox" name="vuln" <%= sqli.vuln ? 'checked' : '' %>> Ranjivost uključena</label></p>
+    <p>Korisničko ime: <input type="text" name="username" size="60" value="<%= sqli.username %>"></p>
+    <button type="submit">Pretraži</button>
+  </form>
+
+  <% if (sqli.query) { %>
+    <p><b>Izvršeni upit:</b> <code><%= sqli.query %></code></p>
+    <% if (sqli.params) { %>
+      <p><b>Parametri:</b> <code><%= JSON.stringify(sqli.params) %></code></p>
+    <% } %>
+    <% if (sqli.error) { %>
+      <p><b>SQL greška:</b> <%= sqli.error %></p>
+    <% } else if (sqli.rows.length === 0) { %>
+      <p>Nema rezultata.</p>
+    <% } else { %>
+      <p><b>Rezultati (<%= sqli.rows.length %>):</b></p>
+      <table border="1">
+        <tr>
+          <% for (const col of Object.keys(sqli.rows[0])) { %><th><%= col %></th><% } %>
+        </tr>
+        <% for (const row of sqli.rows) { %>
+          <tr>
+            <% for (const col of Object.keys(row)) { %><td><%= row[col] %></td><% } %>
+          </tr>
+        <% } %>
+      </table>
+    <% } %>
+  <% } %>
+
+  <hr>
+  <form method="post" action="/reset">
+    <button type="submit">Resetiraj bazu</button>
+  </form>
 </body>
 </html>
