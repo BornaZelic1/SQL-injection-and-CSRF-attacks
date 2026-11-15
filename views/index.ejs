@@ -52,6 +52,69 @@
   <% } %>
 
   <hr>
+  <h2>Lažiranje zahtjeva na drugom sjedištu (CSRF)</h2>
+  <p>
+    <b>Upute:</b> Prijavite se (<code>ana</code> / <code>ana123</code> ili <code>ivan</code> / <code>ivan123</code>).
+    Uz uključenu ranjivost otvorite zlonamjernu stranicu (link ispod). Ona u vaše ime, bez CSRF tokena,
+    šalje zahtjev za promjenu e-maila u <code>napadac@evil.example</code>. Nakon toga vidi se promijenjen
+    e-mail i zapis u logu (Referer završava na <code>/napadac</code>). Zatim isključite ranjivost, spremite
+    postavku i ponovite: zahtjev se odbija jer nema ispravan CSRF token, a legitimna forma ispod i dalje radi.
+  </p>
+  <p>
+    Promjena se vidi i pretragom <code>ana</code> u SQLi sekciji. Baza je zajednička svim posjetiteljima,
+    a log i prekidač vrijede samo za vašu sesiju. Gumb „Resetiraj bazu" na dnu vraća izvorne e-mailove.
+  </p>
+
+  <% if (flash) { %>
+    <p><b><%= flash %></b></p>
+  <% } %>
+
+  <% if (user) { %>
+    <p>Prijavljeni ste kao <b><%= user.username %></b>, e-mail: <b><%= user.email %></b></p>
+    <form method="post" action="/logout">
+      <button type="submit">Odjava</button>
+    </form>
+  <% } else { %>
+    <form method="post" action="/login">
+      <p>
+        Korisničko ime: <input type="text" name="username">
+        Lozinka: <input type="password" name="password">
+        <button type="submit">Prijava</button>
+      </p>
+    </form>
+  <% } %>
+
+  <form method="post" action="/csrf/toggle">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <p>
+      <label><input type="checkbox" name="vuln" <%= csrfVuln ? 'checked' : '' %>> Ranjivost uključena</label>
+      <button type="submit">Spremi postavku</button>
+    </p>
+  </form>
+
+  <% if (user) { %>
+    <form method="post" action="/csrf/email">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <p>
+        Novi e-mail: <input type="text" name="email" size="40">
+        <button type="submit">Promijeni e-mail</button>
+      </p>
+    </form>
+  <% } %>
+
+  <p><a href="/napadac" target="_blank">Otvori zlonamjernu stranicu (simulacija napadača)</a></p>
+
+  <% if (csrfLog.length > 0) { %>
+    <p><b>Log zahtjeva za promjenu e-maila (zadnjih 10):</b></p>
+    <table border="1">
+      <tr><th>Vrijeme</th><th>Traženi e-mail</th><th>Referer</th><th>Ishod</th></tr>
+      <% for (const e of csrfLog) { %>
+        <tr><td><%= e.time %></td><td><%= e.email %></td><td><%= e.referer %></td><td><%= e.outcome %></td></tr>
+      <% } %>
+    </table>
+  <% } %>
+
+  <hr>
   <form method="post" action="/reset">
     <button type="submit">Resetiraj bazu</button>
   </form>
